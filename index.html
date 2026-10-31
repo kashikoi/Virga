@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Virga</title>
+  <meta name="description" content="A local-first inventory and side-hustle planner: parts, build-to-order products, orders, serial numbers and restock planning." />
+  <meta name="theme-color" content="#1c1917" />
+  <link rel="icon" type="image/svg+xml" href="icon.svg?v=2026.10.31.1" />
+  <link rel="apple-touch-icon" href="icon.svg?v=2026.10.31.1" />
+  <link rel="manifest" href="manifest.webmanifest?v=2026.10.31.1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" />
+  <link rel="stylesheet" href="styles.css?v=2026.10.31.1" />
+  <script>
+    // Resolve atmosphere before first paint to prevent a flash of the wrong theme.
+    try {
+      var pref = localStorage.getItem("virga_cloud_theme") || "day";
+      var mode = pref;
+      if (pref === "random") {
+        var modes = ["day", "twilight", "night"];
+        mode = sessionStorage.getItem("virga_cloud_active_theme");
+        if (modes.indexOf(mode) < 0) {
+          mode = modes[Math.floor(Math.random() * modes.length)];
+          sessionStorage.setItem("virga_cloud_active_theme", mode);
+        }
+      }
+      if (mode === "day") document.documentElement.classList.add("day");
+      else if (mode === "twilight") document.documentElement.classList.add("twilight");
+      // night = default (no class)
+    } catch (e) {}
+  </script>
+</head>
+<body>
+  <!-- Ambient scenic background: virga streaming from a storm deck over desert buttes -->
+  <div class="scenic-bg" aria-hidden="true">
+    <div class="scenic-sky"></div>
+    <div class="scenic-stars"></div>
+    <div class="celestial celestial--moon"><span class="celestial__glow"></span><span class="celestial__disc"></span></div>
+    <svg class="scenic-scene" viewBox="0 0 1600 900" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+      <defs>
+        <linearGradient id="stormGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="var(--storm-top)" />
+          <stop offset="1" stop-color="var(--storm-bottom)" />
+        </linearGradient>
+        <linearGradient id="virgaGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="var(--virga)" stop-opacity="0.15" />
+          <stop offset="0.25" stop-color="var(--virga)" stop-opacity="0.85" />
+          <stop offset="0.65" stop-color="var(--virga)" stop-opacity="0.45" />
+          <stop offset="1" stop-color="var(--virga)" stop-opacity="0" />
+        </linearGradient>
+        <linearGradient id="cliffGrad" x1="0" y1="0" x2="1" y2="0">
+          <stop offset="0" stop-color="var(--rock-mid)" />
+          <stop offset="0.35" stop-color="var(--rock-lit)" />
+          <stop offset="1" stop-color="var(--rock-shadow)" />
+        </linearGradient>
+        <linearGradient id="talusGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="var(--talus-lit)" />
+          <stop offset="1" stop-color="var(--talus-shadow)" />
+        </linearGradient>
+        <linearGradient id="desertGrad" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0" stop-color="var(--sand-red)" />
+          <stop offset="0.25" stop-color="var(--desert)" />
+          <stop offset="1" stop-color="var(--desert-fore)" />
+        </linearGradient>
+        <filter id="soften" x="-10%" y="-50%" width="120%" height="200%">
+          <feGaussianBlur stdDeviation="16" />
+        </filter>
+        <filter id="softenLight" x="-10%" y="-30%" width="120%" height="160%">
+          <feGaussianBlur stdDeviation="4" />
+        </filter>
+        <filter id="cloudEdge" x="-5%" y="-5%" width="110%" height="115%">
+          <feGaussianBlur stdDeviation="9" />
+        </filter>
+        <filter id="virgaBlur" x="-50%" y="-10%" width="200%" height="120%">
+          <feGaussianBlur stdDeviation="5 10" />
+        </filter>
+      </defs>
+
+      <!-- glowing light along the horizon -->
+      <ellipse cx="800" cy="660" rx="1000" ry="130" fill="var(--glow)" opacity="0.7" filter="url(#soften)" />
+
+      <!-- virga: rain streaks that evaporate before reaching the desert floor -->
+      <g class="virga" fill="url(#virgaGrad)" filter="url(#virgaBlur)">
+        <path opacity="0.73" d="M 120 369 L 156 369 C 156 486 130 577 121 629 C 114 577 120 486 120 369 Z" />
+        <path opacity="0.5" d="M 195 358 L 220 358 C 220 472 204 560 197 610 C 192 560 195 472 195 358 Z" />
+        <path opacity="0.99" d="M 244 361 L 265 361 C 265 495 235 600 229 660 C 225 600 244 495 244 361 Z" />
+        <path opacity="0.74" d="M 324 341 L 368 341 C 368 462 331 556 320 609 C 311 556 324 462 324 341 Z" />
+        <path opacity="0.69" d="M 379 336 L 404 336 C 404 430 381 503 375 545 C 370 503 379 430 379 336 Z" />
+        <path opacity="0.7" d="M 456 353 L 495 353 C 495 476 473 571 463 626 C 455 571 456 476 456 353 Z" />
+        <path opacity="0.62" d="M 517 366 L 575 366 C 575 514 549 630 535 695 C 523 630 517 514 517 366 Z" />
+        <path opacity="0.92" d="M 595 363 L 625 363 C 625 445 600 508 592 545 C 586 508 595 445 595 363 Z" />
+        <path opacity="0.95" d="M 653 335 L 709 335 C 709 473 673 579 659 641 C 648 579 653 473 653 335 Z" />
+        <path opacity="0.88" d="M 742 338 L 799 338 C 799 443 771 525 757 571 C 746 525 742 443 742 338 Z" />
+        <path opacity="0.51" d="M 821 371 L 842 371 C 842 471 826 549 821 594 C 817 549 821 471 821 371 Z" />
+        <path opacity="0.76" d="M 863 364 L 885 364 C 885 445 857 508 852 544 C 847 508 863 445 863 364 Z" />
+        <path opacity="0.51" d="M 917 340 L 942 340 C 942 469 923 570 916 627 C 911 570 917 469 917 340 Z" />
+        <path opacity="0.62" d="M 972 371 L 999 371 C 999 467 982 541 975 584 C 970 541 972 467 972 371 Z" />
+        <path opacity="0.51" d="M 1053 367 L 1079 367 C 1079 471 1059 553 1053 600 C 1047 553 1053 471 1053 367 Z" />
+        <path opacity="0.61" d="M 1139 364 L 1165 364 C 1165 459 1139 533 1132 575 C 1127 533 1139 459 1139 364 Z" />
+        <path opacity="0.65" d="M 1177 344 L 1198 344 C 1198 462 1179 555 1174 607 C 1169 555 1177 462 1177 344 Z" />
+        <path opacity="0.55" d="M 1230 356 L 1286 356 C 1286 468 1264 554 1250 604 C 1238 554 1230 468 1230 356 Z" />
+        <path opacity="0.86" d="M 1302 344 L 1357 344 C 1357 480 1321 585 1307 645 C 1297 585 1302 480 1302 344 Z" />
+        <path opacity="0.68" d="M 1414 368 L 1440 368 C 1440 513 1419 625 1413 690 C 1407 625 1414 513 1414 368 Z" />
+        <path opacity="0.59" d="M 1453 344 L 1472 344 C 1472 490 1456 603 1451 668 C 1447 603 1453 490 1453 344 Z" />
+        <path opacity="0.49" d="M 1523 341 L 1565 341 C 1565 439 1543 515 1533 558 C 1524 515 1523 439 1523 341 Z" />
+      </g>
+
+      <!-- dark storm deck -->
+      <path fill="url(#stormGrad)" filter="url(#cloudEdge)" d="M -20 -20 H 1620 V 340 C 1605 404 1541 404 1526 345 C 1511 407 1465 407 1450 335 C 1435 381 1404 381 1389 341 C 1374 377 1340 377 1325 339 C 1310 375 1246 375 1231 339 C 1216 409 1132 409 1117 346 C 1102 393 1031 393 1016 334 C 1001 371 969 371 954 353 C 939 409 867 409 852 331 C 837 389 768 389 753 348 C 738 410 689 410 674 332 C 659 399 597 399 582 353 C 567 398 492 398 477 350 C 462 384 377 384 362 347 C 347 405 263 405 248 340 C 233 405 156 405 141 344 C 126 385 58 385 43 345 C 28 373 -5 373 -20 346 Z" />
+      <g fill="var(--storm-top)" opacity="0.8" filter="url(#softenLight)">
+        <ellipse cx="160" cy="140" rx="220" ry="90" />
+        <ellipse cx="560" cy="110" rx="260" ry="100" />
+        <ellipse cx="980" cy="150" rx="240" ry="96" />
+        <ellipse cx="1380" cy="120" rx="260" ry="100" />
+      </g>
+      <g fill="var(--storm-bottom)" opacity="0.75" filter="url(#softenLight)">
+        <ellipse cx="120" cy="300" rx="150" ry="46" />
+        <ellipse cx="400" cy="270" rx="170" ry="54" />
+        <ellipse cx="720" cy="300" rx="180" ry="50" />
+        <ellipse cx="1040" cy="270" rx="170" ry="56" />
+        <ellipse cx="1340" cy="296" rx="190" ry="50" />
+      </g>
+      <g fill="var(--storm-rim)" opacity="0.35" filter="url(#softenLight)">
+        <ellipse cx="260" cy="356" rx="200" ry="14" />
+        <ellipse cx="760" cy="362" rx="240" ry="12" />
+        <ellipse cx="1260" cy="356" rx="220" ry="14" />
+      </g>
+
+      <!-- far mesas on the horizon -->
+      <path fill="var(--mesa-far)" d="M -20 730 L -20 708 L 60 706 L 70 698 L 240 696 L 250 706 L 880 712 L 900 690 L 940 686 L 1060 686 L 1080 700 L 1620 704 L 1620 730 Z" />
+
+      <!-- West Mitten -->
+      <path fill="url(#talusGrad)" d="M 90 800 C 180 770 240 744 290 726 L 470 724 C 530 742 600 772 700 800 Z" />
+      <path fill="url(#cliffGrad)" d="M 300 728 L 302 650 L 312 638 L 334 634 L 440 632 L 456 638 L 462 650 L 466 728 Z" />
+      <path fill="var(--rock-shadow)" opacity="0.45" d="M 430 632 L 456 638 L 462 650 L 466 728 L 436 728 Z" />
+
+      <!-- East Mitten (block + thumb spire) -->
+      <path fill="url(#talusGrad)" d="M 520 806 C 610 776 660 748 700 730 L 860 730 C 920 750 990 782 1080 806 Z" />
+      <path fill="url(#cliffGrad)" d="M 698 734 L 696 660 L 702 642 L 712 638 L 720 650 L 722 734 Z" />
+      <path fill="url(#cliffGrad)" d="M 716 734 L 718 634 L 730 624 L 816 622 L 828 630 L 834 734 Z" />
+      <path fill="var(--rock-shadow)" opacity="0.45" d="M 800 622 L 828 630 L 834 734 L 804 734 Z" />
+
+      <!-- Merrick Butte / long mesa -->
+      <path fill="url(#talusGrad)" d="M 940 800 C 1030 772 1080 750 1120 734 L 1620 730 L 1620 810 Z" />
+      <path fill="url(#cliffGrad)" d="M 1124 736 L 1126 654 L 1140 642 L 1300 638 L 1440 642 L 1620 646 L 1620 736 Z" />
+      <g fill="none" stroke="var(--rock-shadow)" opacity="0.3" stroke-width="2">
+        <path d="M 304 672 L 462 670 M 302 700 L 464 698 M 718 666 L 832 664 M 718 698 L 834 696 M 1126 676 L 1620 680 M 1124 708 L 1620 712" />
+      </g>
+
+      <!-- desert floor -->
+      <path fill="url(#desertGrad)" d="M -20 790 C 200 776 420 800 640 792 C 860 784 1080 806 1300 794 C 1440 786 1540 796 1620 790 L 1620 920 L -20 920 Z" />
+
+      <!-- winding dirt road -->
+      <path fill="none" stroke="var(--road)" stroke-width="10" stroke-linecap="round" opacity="0.85" d="M 600 920 C 640 880 760 870 820 850 C 900 826 840 812 940 804 C 1010 798 1060 800 1120 796" />
+
+      <!-- sagebrush -->
+      <g class="scrub">
+        <ellipse cx="234" cy="837" rx="13.9" ry="6.4" fill="var(--scrub)" />
+        <ellipse cx="84" cy="842" rx="13.4" ry="6.1" fill="var(--scrub)" />
+        <ellipse cx="137" cy="812" rx="8.0" ry="4.6" fill="var(--scrub-dark)" />
+        <ellipse cx="1006" cy="827" rx="14.2" ry="7.6" fill="var(--scrub)" />
+        <ellipse cx="65" cy="903" rx="29.2" ry="14.4" fill="var(--scrub-dark)" />
+        <ellipse cx="490" cy="817" rx="11.1" ry="5.3" fill="var(--scrub)" />
+        <ellipse cx="593" cy="869" rx="18.5" ry="8.5" fill="var(--scrub-dark)" />
+        <ellipse cx="1092" cy="826" rx="10.1" ry="5.0" fill="var(--scrub)" />
+        <ellipse cx="476" cy="850" rx="17.7" ry="9.8" fill="var(--scrub-dark)" />
+        <ellipse cx="841" cy="862" rx="21.1" ry="11.8" fill="var(--scrub-dark)" />
+        <ellipse cx="181" cy="903" rx="22.4" ry="12.6" fill="var(--scrub-dark)" />
+        <ellipse cx="54" cy="854" rx="17.1" ry="9.7" fill="var(--scrub)" />
+        <ellipse cx="498" cy="893" rx="24.8" ry="13.4" fill="var(--scrub)" />
+        <ellipse cx="1351" cy="851" rx="19.3" ry="10.1" fill="var(--scrub)" />
+        <ellipse cx="1126" cy="811" rx="9.0" ry="5.4" fill="var(--scrub)" />
+        <ellipse cx="615" cy="833" rx="13.3" ry="6.0" fill="var(--scrub)" />
+        <ellipse cx="180" cy="822" rx="7.1" ry="4.0" fill="var(--scrub-dark)" />
+        <ellipse cx="623" cy="830" rx="14.2" ry="6.6" fill="var(--scrub)" />
+        <ellipse cx="1421" cy="860" rx="19.9" ry="11.5" fill="var(--scrub-dark)" />
+        <ellipse cx="571" cy="847" rx="17.8" ry="10.6" fill="var(--scrub-dark)" />
+        <ellipse cx="366" cy="823" rx="8.4" ry="4.4" fill="var(--scrub)" />
+        <ellipse cx="-3" cy="831" rx="11.0" ry="5.6" fill="var(--scrub)" />
+        <ellipse cx="1109" cy="900" rx="23.5" ry="12.8" fill="var(--scrub)" />
+        <ellipse cx="1447" cy="810" rx="9.6" ry="5.6" fill="var(--scrub)" />
+        <ellipse cx="636" cy="844" rx="10.1" ry="5.5" fill="var(--scrub-dark)" />
+        <ellipse cx="328" cy="812" rx="6.5" ry="3.3" fill="var(--scrub-dark)" />
+        <ellipse cx="235" cy="805" rx="5.3" ry="2.7" fill="var(--scrub-dark)" />
+        <ellipse cx="985" cy="892" rx="16.8" ry="8.2" fill="var(--scrub-dark)" />
+        <ellipse cx="189" cy="841" rx="16.4" ry="9.8" fill="var(--scrub)" />
+        <ellipse cx="129" cy="853" rx="11.3" ry="5.7" fill="var(--scrub-dark)" />
+        <ellipse cx="252" cy="888" rx="14.4" ry="8.5" fill="var(--scrub)" />
+        <ellipse cx="870" cy="820" rx="6.6" ry="3.5" fill="var(--scrub)" />
+        <ellipse cx="1118" cy="891" rx="18.2" ry="9.2" fill="var(--scrub-dark)" />
+        <ellipse cx="853" cy="882" rx="23.9" ry="11.9" fill="var(--scrub-dark)" />
+        <ellipse cx="1586" cy="886" rx="25.7" ry="14.7" fill="var(--scrub)" />
+        <ellipse cx="357" cy="879" rx="19.9" ry="10.0" fill="var(--scrub-dark)" />
+        <ellipse cx="443" cy="808" rx="6.4" ry="3.5" fill="var(--scrub)" />
+        <ellipse cx="1508" cy="850" rx="19.5" ry="11.6" fill="var(--scrub)" />
+        <ellipse cx="357" cy="827" rx="8.7" ry="4.2" fill="var(--scrub)" />
+        <ellipse cx="1352" cy="895" rx="22.0" ry="12.1" fill="var(--scrub)" />
+        <ellipse cx="1060" cy="813" rx="11.0" ry="6.2" fill="var(--scrub)" />
+        <ellipse cx="279" cy="853" rx="18.2" ry="9.1" fill="var(--scrub)" />
+        <ellipse cx="631" cy="902" rx="22.0" ry="13.0" fill="var(--scrub)" />
+        <ellipse cx="196" cy="822" rx="7.7" ry="4.5" fill="var(--scrub)" />
+        <ellipse cx="1329" cy="820" rx="12.7" ry="7.0" fill="var(--scrub)" />
+        <ellipse cx="202" cy="860" rx="11.1" ry="6.6" fill="var(--scrub)" />
+        <ellipse cx="1502" cy="858" rx="15.3" ry="8.9" fill="var(--scrub)" />
+        <ellipse cx="398" cy="826" rx="9.3" ry="4.5" fill="var(--scrub)" />
+        <ellipse cx="669" cy="831" rx="8.7" ry="5.1" fill="var(--scrub)" />
+        <ellipse cx="935" cy="851" rx="18.9" ry="9.7" fill="var(--scrub)" />
+        <ellipse cx="852" cy="855" rx="15.9" ry="7.2" fill="var(--scrub)" />
+        <ellipse cx="-4" cy="823" rx="12.3" ry="5.9" fill="var(--scrub)" />
+        <ellipse cx="891" cy="878" rx="17.1" ry="9.0" fill="var(--scrub)" />
+        <ellipse cx="162" cy="883" rx="21.2" ry="10.3" fill="var(--scrub-dark)" />
+        <ellipse cx="812" cy="882" rx="21.0" ry="11.8" fill="var(--scrub)" />
+        <ellipse cx="982" cy="849" rx="14.7" ry="7.7" fill="var(--scrub)" />
+        <ellipse cx="854" cy="850" rx="14.6" ry="8.6" fill="var(--scrub)" />
+        <ellipse cx="1516" cy="893" rx="18.4" ry="9.8" fill="var(--scrub)" />
+        <ellipse cx="212" cy="889" rx="15.9" ry="8.2" fill="var(--scrub-dark)" />
+        <ellipse cx="108" cy="829" rx="12.5" ry="7.1" fill="var(--scrub)" />
+        <ellipse cx="1150" cy="820" rx="10.8" ry="5.1" fill="var(--scrub)" />
+        <ellipse cx="346" cy="902" rx="30.5" ry="15.5" fill="var(--scrub)" />
+        <ellipse cx="1339" cy="904" rx="18.5" ry="9.5" fill="var(--scrub)" />
+        <ellipse cx="307" cy="839" rx="11.3" ry="6.3" fill="var(--scrub-dark)" />
+        <ellipse cx="704" cy="860" rx="11.2" ry="5.6" fill="var(--scrub)" />
+        <ellipse cx="94" cy="856" rx="20.9" ry="11.9" fill="var(--scrub)" />
+        <ellipse cx="420" cy="815" rx="6.2" ry="3.5" fill="var(--scrub-dark)" />
+        <ellipse cx="674" cy="818" rx="11.9" ry="6.8" fill="var(--scrub-dark)" />
+        <ellipse cx="1479" cy="820" rx="10.2" ry="5.7" fill="var(--scrub-dark)" />
+        <ellipse cx="1105" cy="811" rx="7.8" ry="3.6" fill="var(--scrub)" />
+      </g>
+
+      <!-- foreground rocks -->
+      <g fill="var(--rock-fore)">
+        <path d="M 1300 920 L 1320 880 L 1370 868 L 1420 884 L 1440 920 Z" />
+        <path d="M 1420 920 L 1450 872 L 1520 860 L 1580 876 L 1620 870 L 1620 920 Z" />
+      </g>
+    </svg>
+  </div>
+
+  <div class="shell" id="shell">
+    <!-- ============ TOP BAR ============ -->
+    <header class="topbar" id="topbar">
+      <nav class="crumb" id="crumb" aria-label="Breadcrumb"></nav>
+      <div class="topbar__actions">
+        <button type="button" class="btn btn--beacon btn--tiny" id="topNewOrderBtn">+ New order</button>
+        <button type="button" class="icon-btn" id="settingsBtn" title="Settings" aria-label="Settings">&#9881;&#65039;</button>
+      </div>
+    </header>
+
+    <div class="app" id="app">
+      <!-- ============ LEFT RAIL ============ -->
+      <aside class="rail" id="rail">
+        <header class="rail__brand">
+          <svg class="brand__emblem" viewBox="0 0 120 80" role="img" aria-label="Virga cloud emblem">
+            <defs>
+              <linearGradient id="emblemCloud" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="#78716c" />
+                <stop offset="1" stop-color="#292524" />
+              </linearGradient>
+              <linearGradient id="emblemStreak" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0" stop-color="var(--beacon-bright)" />
+                <stop offset="1" stop-color="var(--beacon-bright)" stop-opacity="0" />
+              </linearGradient>
+            </defs>
+            <path d="M 16 34 C 8 34 4 26 10 20 C 12 12 24 10 30 14 C 34 4 52 2 60 10 C 68 2 88 4 92 16 C 104 14 116 22 110 32 C 108 36 104 36 100 36 L 20 36 C 18 36 17 35 16 34 Z" fill="url(#emblemCloud)" />
+            <g fill="url(#emblemStreak)">
+              <rect x="26" y="36" width="7" height="26" rx="3" />
+              <rect x="44" y="36" width="9" height="34" rx="4" />
+              <rect x="64" y="36" width="7" height="24" rx="3" />
+              <rect x="82" y="36" width="9" height="32" rx="4" />
+            </g>
+          </svg>
+          <div>
+            <h1 class="brand__name">Virga</h1>
+            <p class="brand__tag" id="brandTag">Inventory &middot; Orders &middot; Restock</p>
+          </div>
+        </header>
+
+        <div class="rail__summary" id="railSummary"></div>
+
+        <ul class="nav-list" id="navList"></ul>
+
+        <button type="button" class="btn btn--beacon rail__new" id="newOrderBtn">+ New order</button>
+        <p class="rail__version" id="appVersion"></p>
+      </aside>
+
+      <!-- ============ MAIN CANVAS ============ -->
+      <main class="canvas" id="canvas"></main>
+    </div>
+  </div>
+
+  <!-- Order editor modal -->
+  <div class="modal" id="orderModal" hidden>
+    <div class="modal__backdrop" data-close></div>
+    <div class="modal__card modal__card--wide" role="dialog" aria-modal="true" aria-labelledby="orderTitle">
+      <div class="modal__header">
+        <h2 class="modal__title" id="orderTitle">New order</h2>
+        <button type="button" class="modal__close" data-close aria-label="Close dialog">&times;</button>
+      </div>
+      <form class="form" id="orderForm" autocomplete="off">
+        <div class="form__row">
+          <label class="field">
+            <span class="field__label">Product</span>
+            <select class="field__input" id="oProduct" required></select>
+          </label>
+          <label class="field">
+            <span class="field__label">Status</span>
+            <select class="field__input" id="oStatus">
+              <option value="open">Sold &middot; to build</option>
+              <option value="built">Built</option>
+              <option value="shipped">Shipped</option>
+              <option value="closed">Completed</option>
+              <option value="cancelled">Cancelled</option>
+            </select>
+          </label>
+        </div>
+        <div class="form__row form__row--3" id="oOptions"></div>
+        <div class="form__row form__row--3">
+          <label class="field">
+            <span class="field__label">Sale date</span>
+            <input class="field__input" id="oDate" type="date" required />
+          </label>
+          <label class="field">
+            <span class="field__label">Quantity</span>
+            <input class="field__input" id="oQty" type="number" min="1" step="1" value="1" required />
+          </label>
+          <label class="field">
+            <span class="field__label">Platform</span>
+            <input class="field__input" id="oPlatform" list="platformList" placeholder="eBay" />
+            <datalist id="platformList">
+              <option value="eBay"></option><option value="Etsy"></option><option value="Direct"></option><option value="Forum"></option><option value="Facebook"></option>
+            </datalist>
+          </label>
+        </div>
+        <div class="form__row">
+          <label class="field">
+            <span class="field__label">Customer / buyer</span>
+            <input class="field__input" id="oCustomer" placeholder="e.g. ebay buyer id" />
+          </label>
+          <label class="field">
+            <span class="field__label">Order # <em>(optional)</em></span>
+            <input class="field__input" id="oRef" placeholder="e.g. 12-34567-89012" />
+          </label>
+        </div>
+        <div class="form__row form__row--4">
+          <label class="field">
+            <span class="field__label">Sale price</span>
+            <input class="field__input" id="oPrice" type="number" step="0.01" min="0" inputmode="decimal" />
+          </label>
+          <label class="field">
+            <span class="field__label">Shipping charged</span>
+            <input class="field__input" id="oShipCharged" type="number" step="0.01" min="0" inputmode="decimal" />
+          </label>
+          <label class="field">
+            <span class="field__label">Postage cost</span>
+            <input class="field__input" id="oShipCost" type="number" step="0.01" min="0" inputmode="decimal" />
+          </label>
+          <div class="field">
+            <span class="field__label"><label for="oFees">Fees</label> <button type="button" class="link-btn" id="oFeeEstimate">estimate</button></span>
+            <input class="field__input" id="oFees" type="number" step="0.01" min="0" inputmode="decimal" />
+          </div>
+        </div>
+        <div class="form__row">
+          <div class="field">
+            <span class="field__label"><label for="oSerials">Serial number(s)</label> <button type="button" class="link-btn" id="oSerialAuto">auto-assign</button></span>
+            <input class="field__input field__input--mono" id="oSerials" placeholder="assigned when built" />
+          </div>
+          <label class="field">
+            <span class="field__label">Tracking # <em>(optional)</em></span>
+            <input class="field__input" id="oTracking" />
+          </label>
+        </div>
+        <label class="check-row">
+          <input type="checkbox" id="oHistorical" />
+          <span><strong>Past order</strong> &mdash; don&rsquo;t deduct parts (my stock count already reflects it)</span>
+        </label>
+        <label class="field">
+          <span class="field__label">Notes</span>
+          <textarea class="field__input field__input--area" id="oNotes" rows="2" placeholder="e.g. Buyer asked for extra gasket"></textarea>
+        </label>
+        <div class="preview" id="oPreview"></div>
+        <div class="form__actions">
+          <button type="button" class="btn btn--danger form__actions-left" id="oDelete" hidden>Delete</button>
+          <button type="button" class="btn btn--ghost" data-close>Cancel</button>
+          <button type="submit" class="btn btn--beacon">Save order <kbd>&#8984;S</kbd></button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Part editor modal -->
+  <div class="modal" id="partModal" hidden>
+    <div class="modal__backdrop" data-close></div>
+    <div class="modal__card modal__card--wide" role="dialog" aria-modal="true" aria-labelledby="partTitle">
+      <div class="modal__header">
+        <h2 class="modal__title" id="partTitle">New part</h2>
+        <button type="button" class="modal__close" data-close aria-label="Close dialog">&times;</button>
+      </div>
+      <form class="form" id="partForm" autocomplete="off">
+        <div class="form__row">
+          <label class="field">
+            <span class="field__label">Part name</span>
+            <input class="field__input" id="pName" required placeholder="e.g. Smoked lens" />
+          </label>
+          <label class="field">
+            <span class="field__label">Category</span>
+            <input class="field__input" id="pCategory" list="categoryList" placeholder="e.g. Lenses" />
+            <datalist id="categoryList"></datalist>
+          </label>
+        </div>
+        <div class="form__row form__row--3">
+          <label class="field">
+            <span class="field__label">SKU / part # <em>(optional)</em></span>
+            <input class="field__input" id="pSku" />
+          </label>
+          <label class="field">
+            <span class="field__label">Unit</span>
+            <input class="field__input" id="pUnit" placeholder="pcs" maxlength="12" />
+          </label>
+          <label class="field">
+            <span class="field__label">Cost per unit ($)</span>
+            <input class="field__input" id="pCost" type="number" step="0.01" min="0" inputmode="decimal" />
+          </label>
+        </div>
+        <div class="form__row form__row--3">
+          <label class="field">
+            <span class="field__label">Reorder when at or below</span>
+            <input class="field__input" id="pReorderPoint" type="number" step="1" min="0" />
+          </label>
+          <label class="field">
+            <span class="field__label">Usual order qty</span>
+            <input class="field__input" id="pReorderQty" type="number" step="1" min="0" />
+          </label>
+          <label class="field">
+            <span class="field__label">Lead time (days)</span>
+            <input class="field__input" id="pLead" type="number" step="1" min="0" />
+          </label>
+        </div>
+        <div class="form__row">
+          <label class="field">
+            <span class="field__label">Supplier</span>
+            <input class="field__input" id="pSupplier" list="supplierList" placeholder="e.g. AliExpress" />
+            <datalist id="supplierList"></datalist>
+          </label>
+          <label class="field">
+            <span class="field__label">Reorder link <em>(optional)</em></span>
+            <input class="field__input" id="pUrl" type="url" placeholder="https://" />
+          </label>
+        </div>
+        <label class="field" id="pStartWrap">
+          <span class="field__label">Currently on hand</span>
+          <input class="field__input" id="pStart" type="number" step="any" min="0" value="0" />
+        </label>
+        <label class="field">
+          <span class="field__label">Notes</span>
+          <textarea class="field__input field__input--area" id="pNotes" rows="2"></textarea>
+        </label>
+        <div id="pHistory"></div>
+        <div class="form__actions">
+          <button type="button" class="btn btn--danger form__actions-left" id="pDelete" hidden>Delete</button>
+          <button type="button" class="btn btn--ghost" data-close>Cancel</button>
+          <button type="submit" class="btn btn--beacon">Save part <kbd>&#8984;S</kbd></button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Adjust stock modal -->
+  <div class="modal" id="adjustModal" hidden>
+    <div class="modal__backdrop" data-close></div>
+    <div class="modal__card" role="dialog" aria-modal="true" aria-labelledby="adjustTitle">
+      <div class="modal__header">
+        <h2 class="modal__title" id="adjustTitle">Adjust stock</h2>
+        <button type="button" class="modal__close" data-close aria-label="Close dialog">&times;</button>
+      </div>
+      <form class="form" id="adjustForm" autocomplete="off">
+        <p class="field__hint" id="aInfo"></p>
+        <div class="seg seg--form" id="aMode">
+          <button type="button" class="seg__btn is-active" data-mode="count">Set physical count</button>
+          <button type="button" class="seg__btn" data-mode="change">Add / remove</button>
+        </div>
+        <div class="form__row">
+          <label class="field">
+            <span class="field__label" id="aAmountLabel">Counted on hand</span>
+            <input class="field__input" id="aAmount" type="number" step="any" required />
+          </label>
+          <label class="field">
+            <span class="field__label">Date</span>
+            <input class="field__input" id="aDate" type="date" required />
+          </label>
+        </div>
+        <label class="field">
+          <span class="field__label">Note <em>(optional)</em></span>
+          <input class="field__input" id="aNote" placeholder="e.g. Cracked during assembly" />
+        </label>
+        <div class="form__actions">
+          <button type="button" class="btn btn--ghost" data-close>Cancel</button>
+          <button type="submit" class="btn btn--beacon">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Purchase order modal -->
+  <div class="modal" id="poModal" hidden>
+    <div class="modal__backdrop" data-close></div>
+    <div class="modal__card modal__card--wide" role="dialog" aria-modal="true" aria-labelledby="poTitle">
+      <div class="modal__header">
+        <h2 class="modal__title" id="poTitle">New purchase</h2>
+        <button type="button" class="modal__close" data-close aria-label="Close dialog">&times;</button>
+      </div>
+      <form class="form" id="poForm" autocomplete="off">
+        <div class="form__row">
+          <label class="field">
+            <span class="field__label">Supplier</span>
+            <input class="field__input" id="poSupplier" list="supplierList" placeholder="e.g. AliExpress" />
+          </label>
+          <label class="field">
+            <span class="field__label">Order # / link <em>(optional)</em></span>
+            <input class="field__input" id="poRef" />
+          </label>
+        </div>
+        <div class="form__row form__row--3">
+          <label class="field">
+            <span class="field__label">Ordered on</span>
+            <input class="field__input" id="poDate" type="date" required />
+          </label>
+          <label class="field">
+            <span class="field__label">Expected</span>
+            <input class="field__input" id="poExpected" type="date" />
+          </label>
+          <label class="field">
+            <span class="field__label">Status</span>
+            <select class="field__input" id="poStatus">
+              <option value="ordered">Ordered (incoming)</option>
+              <option value="received">Received (in stock)</option>
+            </select>
+          </label>
+        </div>
+        <div class="field">
+          <span class="field__label">Items</span>
+          <div class="po-lines" id="poLines"></div>
+          <button type="button" class="btn btn--ghost btn--tiny po-lines__add" id="poAddLine">+ Add item</button>
+        </div>
+        <div class="form__row">
+          <label class="field">
+            <span class="field__label">Shipping / tax ($)</span>
+            <input class="field__input" id="poShipping" type="number" step="0.01" min="0" inputmode="decimal" />
+          </label>
+          <p class="field__hint field__hint--inline po-total" id="poTotal"></p>
+        </div>
+        <label class="field">
+          <span class="field__label">Notes</span>
+          <textarea class="field__input field__input--area" id="poNotes" rows="2"></textarea>
+        </label>
+        <div class="form__actions">
+          <button type="button" class="btn btn--danger form__actions-left" id="poDelete" hidden>Delete</button>
+          <button type="button" class="btn btn--ghost" data-close>Cancel</button>
+          <button type="submit" class="btn btn--beacon">Save purchase</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Settings modal -->
+  <div class="modal" id="settingsModal" hidden>
+    <div class="modal__backdrop" data-close></div>
+    <div class="modal__card" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+      <div class="modal__header">
+        <h2 class="modal__title" id="settingsTitle">Settings</h2>
+        <button type="button" class="modal__close" data-close aria-label="Close dialog">&times;</button>
+      </div>
+      <div class="settings-content">
+        <div class="settings-group">
+          <div class="settings-row__label">Atmosphere</div>
+          <div class="settings-row__desc">Pick the light over the buttes &mdash; or let it roll the dice each visit.</div>
+          <div class="theme-picker" id="themePicker" role="radiogroup" aria-label="Atmosphere">
+            <button type="button" class="theme-chip" data-theme-val="day">&#9728;&#65039; Day</button>
+            <button type="button" class="theme-chip" data-theme-val="twilight">&#127750; Twilight</button>
+            <button type="button" class="theme-chip" data-theme-val="night">&#127769; Night</button>
+            <button type="button" class="theme-chip" data-theme-val="random">&#127922; Random</button>
+          </div>
+        </div>
+        <div class="settings-divider"></div>
+        <div class="settings-group">
+          <div class="settings-row__label">Business</div>
+          <div class="settings-row__desc">Used for fee estimates and restock timing.</div>
+          <form class="form form--flush" id="businessForm" autocomplete="off">
+            <label class="field">
+              <span class="field__label">Business name</span>
+              <input class="field__input" id="bName" placeholder="e.g. 1M Indicators" />
+            </label>
+            <div class="form__row">
+              <label class="field">
+                <span class="field__label">Marketplace fee %</span>
+                <input class="field__input" id="bFeePct" type="number" step="0.01" min="0" />
+              </label>
+              <label class="field">
+                <span class="field__label">Per-order fee ($)</span>
+                <input class="field__input" id="bFeeFixed" type="number" step="0.01" min="0" />
+              </label>
+            </div>
+            <div class="form__row">
+              <label class="field">
+                <span class="field__label">Safety buffer (days)</span>
+                <input class="field__input" id="bBuffer" type="number" step="1" min="0" />
+              </label>
+              <label class="field">
+                <span class="field__label">Sales look-back (days)</span>
+                <input class="field__input" id="bLookback" type="number" step="1" min="30" max="365" />
+              </label>
+            </div>
+          </form>
+        </div>
+        <div class="settings-divider"></div>
+        <div class="settings-group">
+          <p class="settings-privacy">Everything stays 100% in your browser (local-first localStorage).</p>
+          <div class="settings-actions">
+            <button type="button" class="btn btn--ghost" id="exportBtn">Export data (JSON)</button>
+            <button type="button" class="btn btn--ghost" id="importBtn">Import data (JSON)</button>
+            <input type="file" id="importFile" accept="application/json,.json" hidden />
+          </div>
+        </div>
+        <div class="settings-divider"></div>
+        <div class="settings-group">
+          <div class="settings-row__label">Encrypted Cloud Sync</div>
+          <div class="settings-row__desc">Create or enter a recovery phrase. Virga encrypts your backup in this browser before it ever leaves &mdash; the server only ever sees ciphertext and cannot recover lost words. Uses the same phrase as your other cloud apps.</div>
+          <!-- Own <form> so password managers don't pair this field with other inputs as a "username". -->
+          <form class="cloud-data-field" id="cloudPhraseForm" autocomplete="off">
+            <span class="cloud-data-field__label">Recovery phrase</span>
+            <span class="cloud-phrase-entry">
+              <input class="cloud-data-field__input" id="cloudPhrase" type="password" autocomplete="off" spellcheck="false" placeholder="sixteen recovery words" aria-label="Recovery phrase" />
+              <button type="button" class="cloud-phrase-entry__toggle" id="togglePhraseBtn" aria-pressed="false">Show</button>
+            </span>
+          </form>
+          <p class="cloud-phrase-output" id="cloudPhraseOut" hidden></p>
+          <label class="cloud-remember-option">
+            <input type="checkbox" id="rememberPhrase" />
+            <span>Remember on this device</span>
+          </label>
+          <div class="settings-actions settings-actions--compact">
+            <button type="button" class="btn btn--ghost" id="generatePhraseBtn">Create phrase</button>
+            <button type="button" class="btn btn--ghost" id="cloudSaveBtn">Save to cloud</button>
+            <button type="button" class="btn btn--ghost" id="cloudLoadBtn">Restore from cloud</button>
+          </div>
+          <p class="cloud-data-status" id="cloudStatus" aria-live="polite"></p>
+        </div>
+        <div class="settings-divider"></div>
+        <div class="settings-group">
+          <div class="settings-row__label">Data</div>
+          <div class="settings-row__desc">Start from the BMW 1M side-indicator template, load a sample set to explore, or wipe everything.</div>
+          <div class="settings-actions">
+            <button type="button" class="btn btn--ghost" id="templateBtn">Add 1M indicator template</button>
+            <button type="button" class="btn btn--ghost" id="randomizeBtn">Randomize data (demo)</button>
+            <button type="button" class="btn btn--ghost" id="aboutBtn">About Virga</button>
+            <button type="button" class="btn btn--danger" id="clearBtn">Clear all data</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- About modal -->
+  <div class="modal" id="aboutModal" hidden>
+    <div class="modal__backdrop" data-close></div>
+    <div class="modal__card" role="dialog" aria-modal="true" aria-labelledby="aboutTitle">
+      <div class="modal__header">
+        <h2 class="modal__title" id="aboutTitle">About Virga</h2>
+        <button type="button" class="modal__close" data-close aria-label="Close dialog">&times;</button>
+      </div>
+      <div class="about-content">
+        <p class="about-content__name">Virga</p>
+        <p class="about-content__version" id="aboutVersion">Version 2026.10.31.1</p>
+        <p class="about-content__description">A local-first inventory and side-hustle planner. Track parts, build-to-order products and their options, orders, serial numbers, and know exactly when to restock. Named after virga &mdash; rain that streams from a cloud but evaporates before it reaches the desert floor.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+  <script src="app.js?v=2026.10.31.1"></script>
+</body>
+</html>

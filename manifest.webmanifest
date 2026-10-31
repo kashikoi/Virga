@@ -1,0 +1,16 @@
+{
+  "name": "Virga",
+  "short_name": "Virga",
+  "description": "A local-first inventory and side-hustle planner: parts, build-to-order products, orders, serial numbers and restock planning.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#1c1917",
+  "theme_color": "#1c1917",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
