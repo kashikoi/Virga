@@ -7,9 +7,8 @@ this up in a new session, read this first.
 - A personal, local-first **inventory & side-hustle planner**, part of the kashikoi
   cloud-themed app suite (Cumulus, Nimbus, Cirrus, Stratus, Anvil, Arcus). Repo:
   github.com/kashikoi/Virga. Pages: https://kashikoi.github.io/Virga/ (served from `main` /).
-- First use case: the owner's BMW 1M side-indicator eBay business (lens Clear/Smoked ×
-  base Gloss black/Matte black/Chrome, sold as pairs, serials `1M-001`…). `indicatorTemplate()`
-  seeds it; the app itself stays generic (any parts / products / options).
+- Generic: any parts / products / options. A fresh load shows an empty welcome screen (no
+  built-in product template); `demoCatalog()` only seeds the "Explore demo data" sample set.
 - Named after virga. Scenic background is an inline SVG of Monument Valley-style buttes under a
   charcoal storm deck with golden virga streaks (based on a user photo); Day is the default.
   The sagebrush ellipses and virga paths were generated once with a seeded script — edit in place.

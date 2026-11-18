@@ -3,7 +3,7 @@
 ## Overview
 - **Name:** Virga (after virga — rain that streams from a cloud but evaporates before it reaches the desert floor).
 - **Purpose:** A local-first, zero-backend planner for a small build-to-order business. Track the **parts** you build with, the **products** you sell and the **options** buyers choose, every **order** and **serial number**, and get usage-based **restock** advice so you order parts before you run dry.
-- **First use case:** BMW 1M side indicators sold on eBay — lens (Clear / Smoked) × base (Gloss black / Matte black / Chrome). A one-click template sets this up; everything is editable and the app is fully general.
+- **Fully general:** any parts, products and options; a fresh load starts empty (or explore with demo data).
 - **Sister apps:** Shares the sky/cloud design language, settings, and encrypted cloud sync of Cumulus, Nimbus, Cirrus, Stratus, Anvil and Arcus (frosted glass, multi-atmosphere theme, no-build vanilla HTML/CSS/JS).
 
 ## Technology & Design Philosophy
@@ -34,7 +34,7 @@
 - `virga_cloud_phrase` — opt-in remembered cloud recovery phrase.
 
 ## Settings
-Atmosphere (Day / Twilight / Night / Random), Business (name, marketplace fee % + per-order fee, safety buffer days, sales look-back days), Export / Import JSON, Encrypted Cloud Sync (same recovery phrase and shared backup as the other cloud apps), Add 1M indicator template, Randomize data (demo), Clear all data, About.
+Atmosphere (Day / Twilight / Night / Random), Business (name, marketplace fee % + per-order fee, safety buffer days, sales look-back days), Export / Import JSON, Encrypted Cloud Sync (same recovery phrase and shared backup as the other cloud apps), Randomize data (demo), Clear all data, About.
 
 ## Keyboard
 `N` new order · `⌘/Ctrl+S` save the open editor · `Esc` close dialogs.

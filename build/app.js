@@ -13,7 +13,7 @@
   const VIEW_KEY = "virga_cloud_view";
   const REMEMBER_CLOUD_PHRASE_KEY = "virga_cloud_phrase"; // localStorage, opt-in remembered phrase
 
-  const APP_VERSION = "2026.10.31.1";
+  const APP_VERSION = "2026.11.17.1";
   const THEMES = ["day", "twilight", "night"];
   const DEFAULT_THEME = "day";
   const VIEWS = ["dashboard", "orders", "inventory", "restock", "products", "serials"];
@@ -554,9 +554,8 @@
     po.lines.forEach((l) => { const p = partById(l.partId); if (p && l.unitCost > 0) p.unitCost = l.unitCost; });
   }
 
-  // ---------- Templates & demo ----------
-  // A generic starting point for the BMW 1M side-indicator business. Everything is editable.
-  function indicatorTemplate() {
+  // ---------- Demo ----------
+  function demoCatalog() {
     const P = (name, category, cost, extra) => normalizePart(Object.assign({
       id: uid(), name, category, unitCost: cost, reorderPoint: 6, reorderQty: 20, leadTimeDays: 21, supplier: "AliExpress",
     }, extra || {}));
@@ -572,13 +571,13 @@
     };
     const product = normalizeProduct({
       id: uid(),
-      name: "BMW 1M side indicators (pair)",
+      name: "Side indicator lights (pair)",
       icon: "💡",
       price: 89.99,
       shipping: 0,
-      serialPrefix: "1M-",
+      serialPrefix: "SL-",
       serialPad: 3,
-      nextSerial: 24,
+      nextSerial: 1,
       baseBom: [
         { partId: parts.led.id, qty: 2 },
         { partId: parts.gasket.id, qty: 2 },
@@ -595,28 +594,14 @@
           { id: uid(), label: "Chrome", bom: [{ partId: parts.chrome.id, qty: 2 }] },
         ] },
       ],
-      notes: "Sold as a left + right pair. Serials 1M-001 to 1M-023 were used before Virga.",
+      notes: "Sold as a left + right pair.",
     });
     return { parts: Object.values(parts), product };
   }
-  function addTemplate() {
-    if (db.products.some((p) => /1M side indicator/i.test(p.name)) &&
-        !confirm("You already have a 1M side-indicator product. Add another copy of the template?")) return;
-    const t = indicatorTemplate();
-    db.parts.push(...t.parts);
-    db.products.push(t.product);
-    if (!db.business.name) db.business.name = "1M Side Indicators";
-    save();
-    closeModals();
-    setView("inventory");
-    toast("Template added — set your on-hand counts with ± on each part.");
-  }
-
   function demoData() {
-    const t = indicatorTemplate();
-    t.product.nextSerial = 1;
+    const t = demoCatalog();
     const out = emptyDb();
-    out.business.name = "1M Side Indicators";
+    out.business.name = "Demo Shop";
     out.parts = t.parts;
     out.products = [t.product];
     const rnd = (a, b) => a + Math.floor(Math.random() * (b - a + 1));
@@ -624,7 +609,7 @@
     db = out;
     const prod = t.product;
     const lens = prod.options[0], base = prod.options[1];
-    const buyers = ["m3_dave", "e82_fan", "bimmerboy", "nurburg_nate", "valencia_orange", "n54tuner", "sapphire_1m", "jw_motorsport", "carbonkid", "alpine_white"];
+    const buyers = ["dave_m", "lamp_fan", "garage_guy", "nate_r", "orange_cat", "tuner_t", "sapphire", "jw_works", "carbonkid", "alpine_white"];
     const makeOrder = (daysAgo, status) => {
       const smoked = Math.random() < 0.62;
       const baseChoice = Math.random() < 0.5 ? base.choices[0] : (Math.random() < 0.6 ? base.choices[1] : base.choices[2]);
@@ -759,8 +744,7 @@
       <h2 class="empty__title">Welcome to Virga</h2>
       <p class="empty__text">Track the parts you build with, the products and options you sell, every order and serial number &mdash; and know exactly when to restock before you run dry.</p>
       <div class="empty__actions">
-        <button type="button" class="btn btn--beacon" data-act="template">Start with the BMW 1M indicator template</button>
-        <button type="button" class="btn btn--ghost" data-act="new-part">Start blank</button>
+        <button type="button" class="btn btn--beacon" data-act="new-part">Add your first part</button>
         <button type="button" class="btn btn--ghost" data-act="demo">Explore demo data</button>
       </div>
       <div class="welcome-steps">
@@ -1009,7 +993,7 @@
   }
   function productsHtml() {
     const head = pageHead("Products", "What you sell, the options buyers choose, and the parts each uses",
-      `<button type="button" class="btn btn--ghost" data-act="template">+ 1M template</button><button type="button" class="btn btn--beacon" data-pact="new-product">+ New product</button>`);
+      `<button type="button" class="btn btn--beacon" data-pact="new-product">+ New product</button>`);
     if (!db.products.length) return head + `<p class="muted">No products yet.</p>`;
     const noParts = !db.parts.length ? `<div class="insight insight--warn"><span>📦</span><span>Add parts in <button type="button" class="link-btn" data-nav="inventory">Inventory</button> so you can link them here.</span></div>` : "";
     return head + noParts + db.products.map((p) => {
@@ -1038,7 +1022,7 @@
         </div>
         <div class="product-card__grid">
           <label class="field"><span class="field__label">Default price ($)</span><input class="field__input" type="number" step="0.01" min="0" value="${p.price}" ${ctx} data-field="price" /></label>
-          <label class="field"><span class="field__label">Serial prefix</span><input class="field__input field__input--mono" value="${escapeHtml(p.serialPrefix)}" ${ctx} data-field="serialPrefix" placeholder="e.g. 1M-" /></label>
+          <label class="field"><span class="field__label">Serial prefix</span><input class="field__input field__input--mono" value="${escapeHtml(p.serialPrefix)}" ${ctx} data-field="serialPrefix" placeholder="e.g. SN-" /></label>
           <label class="field"><span class="field__label">Digits</span><input class="field__input" type="number" min="0" max="8" step="1" value="${p.serialPad}" ${ctx} data-field="serialPad" /></label>
           <label class="field"><span class="field__label">Next serial #</span><input class="field__input" type="number" min="1" step="1" value="${p.nextSerial}" ${ctx} data-field="nextSerial" /></label>
         </div>
@@ -1790,7 +1774,6 @@
       case "new-order": return openOrderEditor(null);
       case "new-part": return openPartEditor(null);
       case "new-purchase": return openPurchaseEditor(null);
-      case "template": return addTemplate();
       case "demo": return randomizeData();
     }
   }
@@ -1883,7 +1866,6 @@
     el.exportBtn.addEventListener("click", exportJSON);
     el.importBtn.addEventListener("click", () => el.importFile.click());
     el.importFile.addEventListener("change", () => importJSON(el.importFile.files[0]));
-    el.templateBtn.addEventListener("click", addTemplate);
     el.randomizeBtn.addEventListener("click", randomizeData);
     el.clearBtn.addEventListener("click", clearAll);
     el.aboutBtn.addEventListener("click", openAbout);
@@ -1919,7 +1901,7 @@
       "adjustModal", "adjustTitle", "adjustForm", "aInfo", "aMode", "aAmount", "aAmountLabel", "aDate", "aNote",
       "poModal", "poTitle", "poForm", "poSupplier", "poRef", "poDate", "poExpected", "poStatus", "poLines", "poAddLine", "poShipping", "poTotal", "poNotes", "poDelete",
       "settingsModal", "themePicker", "businessForm", "bName", "bFeePct", "bFeeFixed", "bBuffer", "bLookback",
-      "exportBtn", "importBtn", "importFile", "templateBtn", "randomizeBtn", "aboutBtn", "clearBtn",
+      "exportBtn", "importBtn", "importFile", "randomizeBtn", "aboutBtn", "clearBtn",
       "cloudPhraseForm", "cloudPhrase", "togglePhraseBtn", "cloudPhraseOut", "rememberPhrase", "generatePhraseBtn",
       "cloudSaveBtn", "cloudLoadBtn", "cloudStatus", "aboutModal", "aboutVersion", "toast",
     ].forEach((id) => { el[id] = $(id); });
